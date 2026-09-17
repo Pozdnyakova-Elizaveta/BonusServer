@@ -41,7 +41,7 @@ public class BonusServiceImpl implements BonusService {
                 .orElseGet(() ->
                         bonusAccountRepository.save(BonusAccount.builder()
                                 .cardNumber(bonusOperationRequest.getCardNumber())
-                                .balance(bonusOperationRequest.getAmountBonus()).build()));
+                                .balance(BigDecimal.ZERO).build()));
         BigDecimal balance = bonusAccount.getBalance();
         bonusAccount.setBalance(balance.add(bonusOperationRequest.getAmountBonus()));
         BonusOperation bonusOperation = saveOperation(bonusAccount.getId(), bonusOperationRequest.getAmountBonus(),
@@ -162,6 +162,7 @@ public class BonusServiceImpl implements BonusService {
                 .typeOperation(bonusOperation.getTypeOperation().getTitle())
                 .amountBonus(bonusOperation.getAmountBonus())
                 .idCancelledOperation(bonusOperation.getIdCancelledOperation())
+                .statusOperation(bonusOperation.getStatus().getTitle())
                 .creationAt(bonusOperation.getCreationAt()).build();
     }
 }

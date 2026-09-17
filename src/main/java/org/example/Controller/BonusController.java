@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import org.example.DTO.BonusOperationRequest;
+import org.example.DTO.CancelOperationRequest;
 import org.example.DTO.CurrentBalanceDTO;
 import org.example.DTO.BonusOperationDTO;
 import org.example.Service.BonusService;
@@ -22,9 +23,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @org.springframework.web.bind.annotation.RestController
-@RequestMapping("bonus_server/")
+@RequestMapping("/bonus_server")
 @AllArgsConstructor
-public class RestController {
+public class BonusController {
     private final BonusService bonusService;
 
     /**
@@ -52,12 +53,12 @@ public class RestController {
     /**
      * Отмена операции
      *
-     * @param idOperation идентификатор отменяемой операции
+     * @param cancelOperationRequest запрос с идентификатором отменяемой операции
      * @return DTO операции над бонусами
      */
     @PostMapping("/cancel")
-    public BonusOperationDTO cancel(@NotNull @Positive @RequestBody Long idOperation) {
-        return bonusService.cancel(idOperation);
+    public BonusOperationDTO cancel(@Valid @RequestBody CancelOperationRequest cancelOperationRequest) {
+        return bonusService.cancel(cancelOperationRequest.getIdOperation());
     }
 
     /**
@@ -68,7 +69,7 @@ public class RestController {
      * @return страница с операциями
      */
     @GetMapping("/{cardNumber}/history")
-    public Page<BonusOperationDTO> history(@NotBlank @Pattern(regexp = "\\d+") @PathVariable String cardNumber,
+    public Page<BonusOperationDTO> history(@NotBlank @Pattern(regexp = "\\d+") @PathVariable("cardNumber") String cardNumber,
                                            @PageableDefault(size = 20, sort = "createdAt",
                                                    direction = Sort.Direction.DESC) Pageable pageable) {
         return bonusService.getHistory(cardNumber, pageable);
@@ -81,7 +82,7 @@ public class RestController {
      * @return DTO-объект текущего баланса
      */
     @GetMapping(path = "/balance")
-    public CurrentBalanceDTO getBalance(@NotBlank @Pattern(regexp = "\\d+") @RequestParam String cardNumber) {
+    public CurrentBalanceDTO getBalance(@NotBlank @Pattern(regexp = "\\d+") @RequestParam("cardNumber") String cardNumber) {
         return bonusService.getBalance(cardNumber);
     }
 

@@ -83,6 +83,11 @@
             <artifactId>expressly</artifactId>
             <version>6.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>3.2.1</version>
+        </dependency>
     </dependencies>
 
 </project>
