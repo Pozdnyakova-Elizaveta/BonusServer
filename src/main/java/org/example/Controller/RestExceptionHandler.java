@@ -3,12 +3,14 @@ package org.example.Controller;
 import org.example.Exception.ApplicationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 import java.util.stream.Collectors;
 
@@ -44,6 +46,28 @@ public class RestExceptionHandler {
         log.warn("Validation error: {}", e.getMessage());
         String msg = e.getBindingResult().getFieldErrors().stream()
                 .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
+                .collect(Collectors.joining("; "));
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, msg);
+        problemDetail.setTitle("Validation error");
+        return problemDetail;
+    }
+
+    /**
+     * Обработка ошибок валидации параметров метода
+     *
+     * @param e выброшенное исключение
+     * @return ответ со статусом 400 и перечисление ошибок валидации
+     */
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ProblemDetail handleMethodValidation(HandlerMethodValidationException e) {
+        log.warn("Method validation error: {}", e.getMessage());
+        String msg = e.getParameterValidationResults().stream()
+                .flatMap(result -> {
+                    String paramName = result.getMethodParameter().getParameterName();
+                    return result.getResolvableErrors().stream()
+                            .map(MessageSourceResolvable::getDefaultMessage)
+                            .map(error -> paramName + ": " + error);
+                })
                 .collect(Collectors.joining("; "));
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, msg);
         problemDetail.setTitle("Validation error");
