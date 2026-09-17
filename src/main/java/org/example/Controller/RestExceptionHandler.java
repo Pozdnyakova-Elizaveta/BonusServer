@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class RestExceptionHandler {
     private final Logger log = LoggerFactory.getLogger(RestExceptionHandler.class);
+
     /**
      * Обработка бизнес-исключений приложения
      *
@@ -49,7 +51,23 @@ public class RestExceptionHandler {
     }
 
     /**
+     * Обработка исключений оптимистической блокировка
+     *
+     * @param e выброшенное исключение
+     * @return ответ со статусом 409 и сообщение об ошибке
+     */
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ProblemDetail handleOptimisticLockFailure(ObjectOptimisticLockingFailureException e) {
+        log.warn("Optimistic lock exception: {}", e.getMessage());
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.CONFLICT, "Record was modified by another request");
+        problemDetail.setTitle("Optimistic lock exception");
+        return problemDetail;
+    }
+
+    /**
      * Обработка всех остальных исключений
+     *
      * @param e выброшенное исключение
      * @return ответ со статусом 500 и сообщение об ошибке
      */

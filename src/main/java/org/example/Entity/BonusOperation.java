@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -68,4 +69,10 @@ public class BonusOperation {
      */
     @Column(name = "creation_at", nullable = false)
     private LocalDateTime creationAt;
+    /**
+     * Версия для оптимистической блокировки
+     */
+    @Version
+    @Column(nullable = false)
+    private Long version;
 }

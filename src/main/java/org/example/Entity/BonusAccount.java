@@ -6,6 +6,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Version;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -43,4 +44,10 @@ public class BonusAccount {
      */
     @Column(nullable = false, precision = 14, scale = 2)
     private BigDecimal balance;
+    /**
+     * Версия для оптимистической блокировки
+     */
+    @Version
+    @Column(nullable = false)
+    private Long version;
 }
