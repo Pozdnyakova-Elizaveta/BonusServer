@@ -11,6 +11,8 @@ import org.example.Enum.TypeOperation;
 import org.example.Exception.*;
 import org.example.Repository.BonusAccountRepository;
 import org.example.Repository.BonusOperationRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,8 @@ import java.time.LocalDateTime;
 @Service
 @AllArgsConstructor
 public class BonusServiceImpl implements BonusService {
+    private final Logger log = LoggerFactory.getLogger(BonusServiceImpl.class);
+    private static final String ACCOUNT_NOT_FOUND_BY_NUMBER="New bonus account record has been created: cardNumber={}";
     private final BonusAccountRepository bonusAccountRepository;
     private final BonusOperationRepository bonusOperationRepository;
 
@@ -38,10 +42,13 @@ public class BonusServiceImpl implements BonusService {
     @Override
     public BonusOperationDTO accrual(BonusOperationRequest bonusOperationRequest) {
         BonusAccount bonusAccount = bonusAccountRepository.findByCardNumber(bonusOperationRequest.getCardNumber())
-                .orElseGet(() ->
-                        bonusAccountRepository.save(BonusAccount.builder()
-                                .cardNumber(bonusOperationRequest.getCardNumber())
-                                .balance(BigDecimal.ZERO).build()));
+                .orElseGet(() -> {
+                    log.info("New bonus account record has been created: cardNumber={}",
+                            bonusOperationRequest.getCardNumber());
+                    return bonusAccountRepository.save(BonusAccount.builder()
+                            .cardNumber(bonusOperationRequest.getCardNumber())
+                            .balance(BigDecimal.ZERO).build());
+                });
         BigDecimal balance = bonusAccount.getBalance();
         bonusAccount.setBalance(balance.add(bonusOperationRequest.getAmountBonus()));
         BonusOperation bonusOperation = saveOperation(bonusAccount.getId(), bonusOperationRequest.getAmountBonus(),
@@ -60,10 +67,16 @@ public class BonusServiceImpl implements BonusService {
     public BonusOperationDTO deduction(BonusOperationRequest bonusOperationRequest) {
         String cardNumber = bonusOperationRequest.getCardNumber();
         BonusAccount bonusAccount = bonusAccountRepository.findByCardNumber(cardNumber)
-                .orElseThrow(() -> new AccountNotFoundException(cardNumber));
+                .orElseThrow(() -> {
+                    log.warn(ACCOUNT_NOT_FOUND_BY_NUMBER, cardNumber);
+                    return new AccountNotFoundException(cardNumber);
+                });
         BigDecimal balance = bonusAccount.getBalance();
-        if (balance.compareTo(bonusOperationRequest.getAmountBonus()) < 0)
+        if (balance.compareTo(bonusOperationRequest.getAmountBonus()) < 0) {
+            log.warn("Not enough bonuses for deduction: card number={}, on account={}, deduction={}", cardNumber,
+                    balance, bonusOperationRequest.getAmountBonus());
             throw new InsufficientBonusException(cardNumber, balance);
+        }
         bonusAccount.setBalance(balance.subtract(bonusOperationRequest.getAmountBonus()));
         BonusOperation bonusOperation = saveOperation(bonusAccount.getId(), bonusOperationRequest.getAmountBonus(),
                 TypeOperation.DEDUCTION, null);
@@ -80,18 +93,37 @@ public class BonusServiceImpl implements BonusService {
     @Override
     public BonusOperationDTO cancel(Long idOperation) {
         BonusOperation cancelOperation = bonusOperationRepository.findById(idOperation)
-                .orElseThrow(() -> new OperationNotFoundException(idOperation));
+                .orElseThrow(() -> {
+                        log.warn("No operation with id: {}", idOperation);
+                    return new OperationNotFoundException(idOperation);
+                });
         if (cancelOperation.getStatus() == StatusOperation.CANCELED) {
+            log.warn("Operation has already been cancelled: id={}, idAccount={}, typeOperation={}, statusOperation={}",
+                    cancelOperation.getId(), cancelOperation.getIdAccount(), cancelOperation.getTypeOperation(),
+                    cancelOperation.getStatus());
             throw new AlreadyCancelException(cancelOperation.getId());
         }
         Long idCustomer = cancelOperation.getIdAccount();
         BonusAccount bonusAccount = bonusAccountRepository.findById(idCustomer)
-                .orElseThrow(() -> new AccountNotFoundException(idCustomer));
+                .orElseThrow(() -> {
+                    log.warn("No account with id: {}", idCustomer);
+                    return new AccountNotFoundException(idCustomer);
+                });
         BigDecimal balance = bonusAccount.getBalance();
         switch (cancelOperation.getTypeOperation()) {
-            case ACCRUAL -> bonusAccount.setBalance(balance.subtract(cancelOperation.getAmountBonus()));
-            case DEDUCTION -> bonusAccount.setBalance(balance.add(cancelOperation.getAmountBonus()));
-            case CANCELLATION -> throw new UnacceptableCancelException(cancelOperation.getId());
+            case ACCRUAL -> {
+                bonusAccount.setBalance(balance.subtract(cancelOperation.getAmountBonus()));
+            }
+            case DEDUCTION -> {
+                bonusAccount.setBalance(balance.add(cancelOperation.getAmountBonus()));
+            }
+            case CANCELLATION -> {
+                log.warn("An attempt to cancel a cancelled operation:  id={}, idAccount={}, typeOperation={}, " +
+                                "statusOperation={}",
+                        cancelOperation.getId(), cancelOperation.getIdAccount(), cancelOperation.getTypeOperation(),
+                        cancelOperation.getStatus());
+                throw new UnacceptableCancelException(cancelOperation.getId());
+            }
         }
         cancelOperation.setStatus(StatusOperation.CANCELED);
         BonusOperation bonusOperation = saveOperation(idCustomer, cancelOperation.getAmountBonus(),
@@ -109,7 +141,10 @@ public class BonusServiceImpl implements BonusService {
     @Override
     public CurrentBalanceDTO getBalance(String cardNumber) {
         BonusAccount bonusAccount = bonusAccountRepository.findByCardNumber(cardNumber)
-                .orElseThrow(() -> new AccountNotFoundException(cardNumber));
+                .orElseThrow(() -> {
+                    log.warn(ACCOUNT_NOT_FOUND_BY_NUMBER, cardNumber);
+                    return new AccountNotFoundException(cardNumber);
+                });
         return new CurrentBalanceDTO(cardNumber, bonusAccount.getBalance());
     }
 
@@ -124,7 +159,10 @@ public class BonusServiceImpl implements BonusService {
     @Override
     public Page<BonusOperationDTO> getHistory(String cardNumber, Pageable pageable) {
         BonusAccount bonusAccount = bonusAccountRepository.findByCardNumber(cardNumber)
-                .orElseThrow(() -> new AccountNotFoundException(cardNumber));
+                .orElseThrow(() -> {
+                    log.warn(ACCOUNT_NOT_FOUND_BY_NUMBER, cardNumber);
+                    return new AccountNotFoundException(cardNumber);
+                });
         return bonusOperationRepository.findByIdAccount(bonusAccount.getId(), pageable).map(this::toDto);
     }
 
