@@ -6,6 +6,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Column;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,11 +35,12 @@ public class BonusAccount {
     /**
      * Номер карты
      */
+    @Pattern(regexp = "\\d{16}")
     @Column(name="card_number", nullable = false, unique = true)
     private String cardNumber;
     /**
      * Количество бонусов
      */
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 14, scale = 2)
     private BigDecimal balance;
 }

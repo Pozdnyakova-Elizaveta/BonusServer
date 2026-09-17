@@ -1,7 +1,7 @@
 package org.example.Controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import org.example.DTO.BonusOperationRequest;
@@ -95,7 +95,7 @@ public class BonusController {
      * @return страница с операциями
      */
     @GetMapping("/history")
-    public Page<BonusOperationDTO> getHistory(@NotBlank @Pattern(regexp = "\\d+") @RequestParam("cardNumber") String cardNumber,
+    public Page<BonusOperationDTO> getHistory(@NotNull @Pattern(regexp = "\\d{16}") @RequestParam("cardNumber") String cardNumber,
                                               @PageableDefault(size = 20, sort = "createdAt",
                                                    direction = Sort.Direction.DESC) Pageable pageable) {
         log.info("Getting bonus history: cardNumber={}, pageSize={}, pageNumber={}",
@@ -113,7 +113,7 @@ public class BonusController {
      * @return DTO-объект текущего баланса
      */
     @GetMapping(path = "/balance")
-    public CurrentBalanceDTO getBalance(@NotBlank @Pattern(regexp = "\\d+") @RequestParam("cardNumber") String cardNumber) {
+    public CurrentBalanceDTO getBalance(@NotNull @Pattern(regexp = "\\d{16}") @RequestParam("cardNumber") String cardNumber) {
         log.info("Getting bonus balance: cardNumber={}", cardNumber);
         CurrentBalanceDTO response = bonusService.getBalance(cardNumber);
         log.info("Bonus balance has been got: cardNumber={}, balance={}", response.getCardNumber(), response.getBalance());

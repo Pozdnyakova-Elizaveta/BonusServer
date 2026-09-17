@@ -55,7 +55,7 @@ public class BonusOperation {
     /**
      * Сумма бонусов, участвующих в операции
      */
-    @Column(name = "amount_bonus", nullable = false)
+    @Column(name = "amount_bonus", nullable = false, precision = 19, scale = 2)
     private BigDecimal amountBonus;
     /**
      * Статус операции: выполнена или отменена
