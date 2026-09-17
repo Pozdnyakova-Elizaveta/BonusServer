@@ -42,7 +42,7 @@ public class BonusAccount {
     /**
      * Количество бонусов
      */
-    @Column(nullable = false, precision = 14, scale = 2)
+    @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal balance;
     /**
      * Версия для оптимистической блокировки

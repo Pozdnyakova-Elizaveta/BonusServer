@@ -17,4 +17,4 @@
 
 ## Подготовка к запуску
 Прописать в [application.properties](src/main/resources/application.properties) url-путь до БД, логин и пароль для подключения.
-При необходимости изменить hibernate-параметры
+При необходимости изменить hibernate- и liquibase-параметры

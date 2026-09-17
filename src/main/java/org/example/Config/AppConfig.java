@@ -3,6 +3,7 @@ package org.example.Config;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
+import liquibase.integration.spring.SpringLiquibase;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -98,4 +99,18 @@ public class AppConfig {
     public PlatformTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);
     }
+
+    @Bean
+    public SpringLiquibase liquibase(
+            DataSource dataSource,
+            @Value("${liquibase.changelog}") String changeLog,
+            @Value("${liquibase.enabled:true}") boolean enabled
+    ) {
+        SpringLiquibase liquibase = new SpringLiquibase();
+        liquibase.setDataSource(dataSource);
+        liquibase.setChangeLog(changeLog);
+        liquibase.setShouldRun(enabled);
+        return liquibase;
+    }
+
 }
