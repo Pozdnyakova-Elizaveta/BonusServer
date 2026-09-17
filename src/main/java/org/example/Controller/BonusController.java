@@ -42,9 +42,9 @@ public class BonusController {
         log.info("Bonus accrual: cardNumber={}, amountBonus={}",
                 bonusOperationRequest.getCardNumber(), bonusOperationRequest.getAmountBonus());
         BonusOperationDTO response = bonusService.accrual(bonusOperationRequest);
-        log.info("Bonuses have been accrued: id={}, idAccount={}, typeOperation={}," +
+        log.info("Bonuses have been accrued: id={}, accountId={}, typeOperation={}," +
                         "amountBonus={}, statusOperation={}, creationAt={}",
-                response.getId(), response.getIdAccount(), response.getTypeOperation(), response.getAmountBonus(),
+                response.getId(), response.getAccountId(), response.getTypeOperation(), response.getAmountBonus(),
                 response.getStatusOperation(), response.getCreationAt());
         return response;
     }
@@ -61,9 +61,9 @@ public class BonusController {
         log.info("Bonus deduction: cardNumber={}, amountBonus={}",
                 bonusOperationRequest.getCardNumber(), bonusOperationRequest.getAmountBonus());
         BonusOperationDTO response = bonusService.deduction(bonusOperationRequest);
-        log.info("Bonuses have been deducted: id={}, idAccount={}, typeOperation={}," +
+        log.info("Bonuses have been deducted: id={}, accountId={}, typeOperation={}," +
                         "amountBonus={}, statusOperation={}, creationAt={}",
-                response.getId(), response.getIdAccount(), response.getTypeOperation(), response.getAmountBonus(),
+                response.getId(), response.getAccountId(), response.getTypeOperation(), response.getAmountBonus(),
                 response.getStatusOperation(), response.getCreationAt());
         return response;
     }
@@ -77,12 +77,12 @@ public class BonusController {
     @PostMapping("/cancel")
     @ResponseStatus(HttpStatus.CREATED)
     public BonusOperationDTO cancel(@Valid @RequestBody CancelOperationRequest cancelOperationRequest) {
-        log.info("Cancellation of  operation: idOperation={}",
-                cancelOperationRequest.getIdOperation());
-        BonusOperationDTO response = bonusService.cancel(cancelOperationRequest.getIdOperation());
-        log.info("Operation has been cancelled: id={}, idAccount={}, typeOperation={}," +
+        log.info("Cancellation of  operation: operationId={}",
+                cancelOperationRequest.getOperationId());
+        BonusOperationDTO response = bonusService.cancel(cancelOperationRequest.getOperationId());
+        log.info("Operation has been cancelled: id={}, accountId={}, typeOperation={}," +
                         "amountBonus={}, statusOperation={}, creationAt={}",
-                response.getId(), response.getIdAccount(), response.getTypeOperation(), response.getAmountBonus(),
+                response.getId(), response.getAccountId(), response.getTypeOperation(), response.getAmountBonus(),
                 response.getStatusOperation(), response.getCreationAt());
         return response;
     }

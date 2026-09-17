@@ -86,24 +86,24 @@ public class BonusServiceImpl implements BonusService {
     /**
      * Отмена операции
      *
-     * @param idOperation идентификатор операции
+     * @param operationId идентификатор операции
      * @return dto-объект операции над бонусами
      */
     @Transactional
     @Override
-    public BonusOperationDTO cancel(Long idOperation) {
-        BonusOperation cancelOperation = bonusOperationRepository.findById(idOperation)
+    public BonusOperationDTO cancel(Long operationId) {
+        BonusOperation cancelOperation = bonusOperationRepository.findById(operationId)
                 .orElseThrow(() -> {
-                        log.warn("No operation with id: {}", idOperation);
-                    return new OperationNotFoundException(idOperation);
+                        log.warn("No operation with id: {}", operationId);
+                    return new OperationNotFoundException(operationId);
                 });
         if (cancelOperation.getStatus() == StatusOperation.CANCELED) {
-            log.warn("Operation has already been cancelled: id={}, idAccount={}, typeOperation={}, statusOperation={}",
-                    cancelOperation.getId(), cancelOperation.getIdAccount(), cancelOperation.getTypeOperation(),
+            log.warn("Operation has already been cancelled: id={}, accountId={}, typeOperation={}, statusOperation={}",
+                    cancelOperation.getId(), cancelOperation.getAccountId(), cancelOperation.getTypeOperation(),
                     cancelOperation.getStatus());
             throw new AlreadyCancelException(cancelOperation.getId());
         }
-        Long idCustomer = cancelOperation.getIdAccount();
+        Long idCustomer = cancelOperation.getAccountId();
         BonusAccount bonusAccount = bonusAccountRepository.findById(idCustomer)
                 .orElseThrow(() -> {
                     log.warn("No account with id: {}", idCustomer);
@@ -118,9 +118,9 @@ public class BonusServiceImpl implements BonusService {
                 bonusAccount.setBalance(balance.add(cancelOperation.getAmountBonus()));
             }
             case CANCELLATION -> {
-                log.warn("An attempt to cancel a cancelled operation:  id={}, idAccount={}, typeOperation={}, " +
+                log.warn("An attempt to cancel a cancelled operation:  id={}, accountId={}, typeOperation={}, " +
                                 "statusOperation={}",
-                        cancelOperation.getId(), cancelOperation.getIdAccount(), cancelOperation.getTypeOperation(),
+                        cancelOperation.getId(), cancelOperation.getAccountId(), cancelOperation.getTypeOperation(),
                         cancelOperation.getStatus());
                 throw new UnacceptableCancelException(cancelOperation.getId());
             }
@@ -163,7 +163,7 @@ public class BonusServiceImpl implements BonusService {
                     log.warn(ACCOUNT_NOT_FOUND_BY_NUMBER, cardNumber);
                     return new AccountNotFoundException(cardNumber);
                 });
-        return bonusOperationRepository.findByIdAccount(bonusAccount.getId(), pageable).map(this::toDto);
+        return bonusOperationRepository.findByAccountId(bonusAccount.getId(), pageable).map(this::toDto);
     }
 
     /**
@@ -178,11 +178,11 @@ public class BonusServiceImpl implements BonusService {
     private BonusOperation saveOperation(Long accountId, BigDecimal amountBonus, TypeOperation typeOperation,
                                          Long idCancelledOperation) {
         BonusOperation bonusOperation = BonusOperation.builder()
-                .idAccount(accountId)
+                .accountId(accountId)
                 .amountBonus(amountBonus)
                 .typeOperation(typeOperation)
                 .status(StatusOperation.COMPLETED)
-                .idCancelledOperation(idCancelledOperation)
+                .cancelledOperationId(idCancelledOperation)
                 .creationAt(LocalDateTime.now())
                 .build();
         return bonusOperationRepository.save(bonusOperation);
@@ -196,10 +196,10 @@ public class BonusServiceImpl implements BonusService {
      */
     private BonusOperationDTO toDto(BonusOperation bonusOperation) {
         return BonusOperationDTO.builder().id(bonusOperation.getId())
-                .idAccount(bonusOperation.getIdAccount())
+                .accountId(bonusOperation.getAccountId())
                 .typeOperation(bonusOperation.getTypeOperation().getTitle())
                 .amountBonus(bonusOperation.getAmountBonus())
-                .idCancelledOperation(bonusOperation.getIdCancelledOperation())
+                .cancelledOperationId(bonusOperation.getCancelledOperationId())
                 .statusOperation(bonusOperation.getStatus().getTitle())
                 .creationAt(bonusOperation.getCreationAt()).build();
     }

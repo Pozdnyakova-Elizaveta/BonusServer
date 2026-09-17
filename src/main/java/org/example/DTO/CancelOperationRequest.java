@@ -20,5 +20,5 @@ public class CancelOperationRequest {
      */
     @NotNull
     @Positive
-    Long idOperation;
+    Long operationId;
 }

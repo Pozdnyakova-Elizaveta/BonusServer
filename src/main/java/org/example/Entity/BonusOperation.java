@@ -39,8 +39,8 @@ public class BonusOperation {
     /**
      * Внешний ключ на счет
      */
-    @Column(name = "id_account", nullable = false)
-    private Long idAccount;
+    @Column(name = "account_id", nullable = false)
+    private Long accountId;
     /**
      * Тип операции: начисление, списание, возврат
      */
@@ -50,8 +50,8 @@ public class BonusOperation {
     /**
      * Для возврата списанных/начисленных бонусов - id отмененной операции
      */
-    @Column(name = "id_cancelled_operation")
-    private Long idCancelledOperation;
+    @Column(name = "cancelled_operation_id")
+    private Long cancelledOperationId;
     /**
      * Сумма бонусов, участвующих в операции
      */

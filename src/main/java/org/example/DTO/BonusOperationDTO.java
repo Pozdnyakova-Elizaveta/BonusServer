@@ -23,7 +23,7 @@ public class BonusOperationDTO {
     /**
      * Внешний ключ на счет
      */
-    private Long idAccount;
+    private Long accountId;
     /**
      * Тип операции: начисление, списание, возврат
      */
@@ -31,7 +31,7 @@ public class BonusOperationDTO {
     /**
      * Для возврата списанных/начисленных бонусов - id отмененной операции
      */
-    private Long idCancelledOperation;
+    private Long cancelledOperationId;
     /**
      * Сумма бонусов, участвующих в операции
      */

@@ -14,7 +14,7 @@ public interface BonusService {
 
     BonusOperationDTO deduction(BonusOperationRequest bonusOperationRequest);
 
-    BonusOperationDTO cancel(Long idOperation);
+    BonusOperationDTO cancel(Long operationId);
 
     CurrentBalanceDTO getBalance(String cardNumber);
 
