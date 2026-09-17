@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  */
 @RestControllerAdvice
 public class RestExceptionHandler {
-    private final Logger log = LoggerFactory.getLogger(RestExceptionHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(RestExceptionHandler.class);
 
     /**
      * Обработка бизнес-исключений приложения

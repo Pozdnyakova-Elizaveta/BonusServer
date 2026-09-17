@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,8 +27,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @org.springframework.web.bind.annotation.RestController
 @RequestMapping("/bonus_server")
 @AllArgsConstructor
+@Validated
 public class BonusController {
-    private final Logger log = LoggerFactory.getLogger(BonusController.class);
+    private static final Logger log = LoggerFactory.getLogger(BonusController.class);
     private final BonusService bonusService;
 
     /**

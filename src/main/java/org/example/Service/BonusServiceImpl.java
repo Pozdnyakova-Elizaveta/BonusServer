@@ -27,8 +27,8 @@ import java.time.LocalDateTime;
 @Service
 @AllArgsConstructor
 public class BonusServiceImpl implements BonusService {
-    private final Logger log = LoggerFactory.getLogger(BonusServiceImpl.class);
-    private static final String ACCOUNT_NOT_FOUND_BY_NUMBER="New bonus account record has been created: cardNumber={}";
+    private static final Logger log = LoggerFactory.getLogger(BonusServiceImpl.class);
+    private static final String ACCOUNT_NOT_FOUND_BY_NUMBER="No account with the card number: {}, cardNumber";
     private final BonusAccountRepository bonusAccountRepository;
     private final BonusOperationRepository bonusOperationRepository;
 
