@@ -2,8 +2,6 @@ package org.example.Controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import org.example.DTO.BonusOperationRequest;
@@ -15,12 +13,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @org.springframework.web.bind.annotation.RestController
 @RequestMapping("/bonus_server")
@@ -35,6 +35,7 @@ public class BonusController {
      * @return DTO операции над бонусами
      */
     @PostMapping("/accrual")
+    @ResponseStatus(HttpStatus.CREATED)
     public BonusOperationDTO accrual(@Valid @RequestBody BonusOperationRequest bonusOperationRequest) {
         return bonusService.accrual(bonusOperationRequest);
     }
@@ -46,6 +47,7 @@ public class BonusController {
      * @return DTO операции над бонусами
      */
     @PostMapping("/deduction")
+    @ResponseStatus(HttpStatus.CREATED)
     public BonusOperationDTO deduction(@Valid @RequestBody BonusOperationRequest bonusOperationRequest) {
         return bonusService.deduction(bonusOperationRequest);
     }
@@ -57,6 +59,7 @@ public class BonusController {
      * @return DTO операции над бонусами
      */
     @PostMapping("/cancel")
+    @ResponseStatus(HttpStatus.CREATED)
     public BonusOperationDTO cancel(@Valid @RequestBody CancelOperationRequest cancelOperationRequest) {
         return bonusService.cancel(cancelOperationRequest.getIdOperation());
     }
