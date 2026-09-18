@@ -6,7 +6,6 @@ import org.example.DTO.AuthResponse;
 import org.example.DTO.LoginRequest;
 import org.example.DTO.RegisterRequest;
 import org.example.DTO.UserDTO;
-import org.example.Enum.Role;
 import org.example.Service.JwtService;
 import org.example.Service.UserService;
 import org.slf4j.Logger;
@@ -15,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,7 +52,11 @@ public class UserController {
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getLogin(), request.getPassword()));
         UserDetails user = (UserDetails) auth.getPrincipal();
-        String token = jwtService.generateToken(user.getUsername(), user.getAuthorities().toString());
+        String role = user.getAuthorities().stream()
+                .findFirst()
+                .map(GrantedAuthority::getAuthority)
+                .orElseThrow(() -> new IllegalStateException("У пользователя нет ролей"));
+        String token = jwtService.generateToken(user.getUsername(), role);
         return new AuthResponse(token);
     }
 }

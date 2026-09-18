@@ -16,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,7 +36,6 @@ public class BonusController {
      * @param bonusOperationRequest запрос с данными о карте и количестве начисляемых бонусов
      * @return DTO операции над бонусами
      */
-    @PreAuthorize("hasAuthority('ROLE_WRITE')")
     @PostMapping("/accrual")
     @ResponseStatus(HttpStatus.CREATED)
     public BonusOperationDTO accrual(@Valid @RequestBody BonusOperationRequest bonusOperationRequest) {
@@ -57,7 +55,6 @@ public class BonusController {
      * @param bonusOperationRequest запрос с данными о карте и количестве списываемых бонусов
      * @return DTO операции над бонусами
      */
-    @PreAuthorize("hasAuthority('ROLE_WRITE')")
     @PostMapping("/deduction")
     @ResponseStatus(HttpStatus.CREATED)
     public BonusOperationDTO deduction(@Valid @RequestBody BonusOperationRequest bonusOperationRequest) {
@@ -77,7 +74,6 @@ public class BonusController {
      * @param cancelOperationRequest запрос с идентификатором отменяемой операции
      * @return DTO операции над бонусами
      */
-    @PreAuthorize("hasAuthority('ROLE_WRITE')")
     @PostMapping("/cancel")
     @ResponseStatus(HttpStatus.CREATED)
     public BonusOperationDTO cancel(@Valid @RequestBody CancelOperationRequest cancelOperationRequest) {
@@ -98,7 +94,6 @@ public class BonusController {
      * @param pageable   параметры пагинации
      * @return страница с операциями
      */
-    @PreAuthorize("hasAnyAuthority('ROLE_READ','ROLE_WRITE')")
     @GetMapping("/history")
     public Page<BonusOperationDTO> getHistory(@NotNull @Pattern(regexp = "\\d{16}") @RequestParam("cardNumber") String cardNumber,
                                               @PageableDefault(size = 20, sort = "createdAt",
@@ -117,7 +112,6 @@ public class BonusController {
      * @param cardNumber номер карты
      * @return DTO-объект текущего баланса
      */
-    @PreAuthorize("hasAnyAuthority('ROLE_READ','ROLE_WRITE')")
     @GetMapping(path = "/balance")
     public CurrentBalanceDTO getBalance(@NotNull @Pattern(regexp = "\\d{16}") @RequestParam("cardNumber") String cardNumber) {
         log.info("Getting bonus balance: cardNumber={}", cardNumber);

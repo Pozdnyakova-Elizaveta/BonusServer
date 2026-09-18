@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import org.example.Service.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -25,6 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @AllArgsConstructor
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtFilter;
 
@@ -34,11 +35,21 @@ public class SecurityConfig {
      * @return собранная цепочка фильтров
      */
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http){
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
                             auth.requestMatchers("/bonus_server/register", "/bonus_server/login").permitAll();
+                            auth.requestMatchers(HttpMethod.POST,
+                                            "/bonus_server/accrual",
+                                            "/bonus_server/deduction",
+                                            "/bonus_server/cancel")
+                                    .hasAuthority("ROLE_WRITE");
+                            auth.requestMatchers(HttpMethod.GET,
+                                            "/bonus_server/history",
+                                            "/bonus_server/balance")
+                                    .hasAnyAuthority("ROLE_READ", "ROLE_WRITE");
                             auth.anyRequest().authenticated();
                         }
                 )
