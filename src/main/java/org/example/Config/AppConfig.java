@@ -14,6 +14,11 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -100,6 +105,13 @@ public class AppConfig {
         return new JpaTransactionManager(entityManagerFactory);
     }
 
+    /**
+     * Создание liquibase-бина
+     * @param dataSource подключение к бд
+     * @param changeLog путь к changelog мастер-файлу
+     * @param enabled флаг миграции
+     * @return настроенный бин liquibase
+     */
     @Bean
     public SpringLiquibase liquibase(
             DataSource dataSource,
@@ -113,4 +125,24 @@ public class AppConfig {
         return liquibase;
     }
 
+    /**
+     * Создания бина для хеширования паролей
+     * @return бин для BCrypt-хеширования
+     */
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(12);
+    }
+
+    /**
+     * Создание настроек jwt по параметрам из application.properties
+     * @param secret секретный ключ для подписи и проверки токенов
+     * @param ms время жизни access-токена
+     * @return бин jwt нестроек
+     */
+    @Bean
+    public JwtProperties jwtProperties(@Value("${jwt.secret}") String secret,
+                                       @Value("${jwt.expiration-ms}") Long ms) {
+        return new JwtProperties(secret, ms);
+    }
 }

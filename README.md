@@ -16,5 +16,8 @@
 | GET | `/bonus_server/balance?cardNumber=...` | `cardNumber` в query                      | Получение баланса по номеру карты          |
 
 ## Подготовка к запуску
-Прописать в [application.properties](src/main/resources/application.properties) url-путь до БД, логин и пароль для подключения.
+Прописать в [application.properties](src/main/resources/application.properties) url-путь до БД, логин и пароль для подключения
+
+Подставить секретный ключ в [application.properties](src/main/resources/application.properties) jwt.secret
+
 При необходимости изменить hibernate- и liquibase-параметры
