@@ -1,7 +1,6 @@
-package org.example.DTO;
+package org.example.DTO.Response;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

@@ -1,4 +1,4 @@
-package org.example.DTO;
+package org.example.DTO.Request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,23 +10,30 @@ import lombok.Setter;
 import org.example.Enum.Role;
 
 /**
- * Запрос на аутентификацию
+ * Запрос на регистрацию
  */
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
-public class LoginRequest {
+public class RegisterRequest {
     /**
      * Логин
      */
     @NotNull
     @NotBlank
+    @Size(min = 8, max = 32)
     private String login;
     /**
      * Пароль
      */
     @NotNull
     @NotBlank
+    @Size(min = 8, max = 32)
     private String password;
+    /**
+     * Роль для регистрации
+     */
+    @NotNull
+    private Role role;
 }

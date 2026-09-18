@@ -1,4 +1,4 @@
-package org.example.Service;
+package org.example.Service.JWT;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -14,7 +14,6 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Сервис для работы с JWT-токенами

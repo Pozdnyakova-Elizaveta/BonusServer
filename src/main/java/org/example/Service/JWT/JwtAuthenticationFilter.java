@@ -1,4 +1,4 @@
-package org.example.Service;
+package org.example.Service.JWT;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -43,7 +43,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             chain.doFilter(request, response);
             return;
         }
-
         String token = header.substring(7);
         if (jwtService.isValid(token)
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -56,7 +55,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
-
         chain.doFilter(request, response);
     }
 }

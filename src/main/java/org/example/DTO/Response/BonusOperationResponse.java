@@ -1,4 +1,4 @@
-package org.example.DTO;
+package org.example.DTO.Response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @Builder
-public class BonusOperationDTO {
+public class BonusOperationResponse {
     /**
      * Идентификатор операции
      */

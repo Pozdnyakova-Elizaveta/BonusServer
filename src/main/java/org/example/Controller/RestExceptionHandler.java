@@ -163,7 +163,7 @@ public class RestExceptionHandler {
     public ProblemDetail handleAll(Exception e) {
         log.error("Unhandled exception", e);
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                HttpStatus.INTERNAL_SERVER_ERROR, "Внутренняя ошибка сервера");
+                HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
         problemDetail.setTitle("Internal server error");
         return problemDetail;
     }

@@ -1,9 +1,9 @@
-package org.example.Service;
+package org.example.Service.Impl;
 
 import lombok.AllArgsConstructor;
-import org.example.DTO.BonusOperationRequest;
-import org.example.DTO.CurrentBalanceDTO;
-import org.example.DTO.BonusOperationDTO;
+import org.example.DTO.Request.BonusOperationRequest;
+import org.example.DTO.Response.CurrentBalanceResponse;
+import org.example.DTO.Response.BonusOperationResponse;
 import org.example.Entity.BonusAccount;
 import org.example.Entity.BonusOperation;
 import org.example.Enum.StatusOperation;
@@ -11,6 +11,7 @@ import org.example.Enum.TypeOperation;
 import org.example.Exception.*;
 import org.example.Repository.BonusAccountRepository;
 import org.example.Repository.BonusOperationRepository;
+import org.example.Service.Interface.BonusService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -28,7 +29,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class BonusServiceImpl implements BonusService {
     private static final Logger log = LoggerFactory.getLogger(BonusServiceImpl.class);
-    private static final String ACCOUNT_NOT_FOUND_BY_NUMBER="No account with the card number: {}, cardNumber";
+    private static final String ACCOUNT_NOT_FOUND_BY_NUMBER = "No account with the card number: {}, cardNumber";
     private final BonusAccountRepository bonusAccountRepository;
     private final BonusOperationRepository bonusOperationRepository;
 
@@ -40,7 +41,7 @@ public class BonusServiceImpl implements BonusService {
      */
     @Transactional
     @Override
-    public BonusOperationDTO accrual(BonusOperationRequest bonusOperationRequest) {
+    public BonusOperationResponse accrual(BonusOperationRequest bonusOperationRequest) {
         BonusAccount bonusAccount = bonusAccountRepository.findByCardNumber(bonusOperationRequest.getCardNumber())
                 .orElseGet(() -> {
                     log.info("New bonus account record has been created: cardNumber={}",
@@ -64,7 +65,7 @@ public class BonusServiceImpl implements BonusService {
      */
     @Transactional
     @Override
-    public BonusOperationDTO deduction(BonusOperationRequest bonusOperationRequest) {
+    public BonusOperationResponse deduction(BonusOperationRequest bonusOperationRequest) {
         String cardNumber = bonusOperationRequest.getCardNumber();
         BonusAccount bonusAccount = bonusAccountRepository.findByCardNumber(cardNumber)
                 .orElseThrow(() -> {
@@ -91,10 +92,10 @@ public class BonusServiceImpl implements BonusService {
      */
     @Transactional
     @Override
-    public BonusOperationDTO cancel(Long operationId) {
+    public BonusOperationResponse cancel(Long operationId) {
         BonusOperation cancelOperation = bonusOperationRepository.findById(operationId)
                 .orElseThrow(() -> {
-                        log.warn("No operation with id: {}", operationId);
+                    log.warn("No operation with id: {}", operationId);
                     return new OperationNotFoundException(operationId);
                 });
         if (cancelOperation.getStatus() == StatusOperation.CANCELED) {
@@ -139,13 +140,13 @@ public class BonusServiceImpl implements BonusService {
      */
     @Transactional(readOnly = true)
     @Override
-    public CurrentBalanceDTO getBalance(String cardNumber) {
+    public CurrentBalanceResponse getBalance(String cardNumber) {
         BonusAccount bonusAccount = bonusAccountRepository.findByCardNumber(cardNumber)
                 .orElseThrow(() -> {
                     log.warn(ACCOUNT_NOT_FOUND_BY_NUMBER, cardNumber);
                     return new AccountNotFoundException(cardNumber);
                 });
-        return new CurrentBalanceDTO(cardNumber, bonusAccount.getBalance());
+        return new CurrentBalanceResponse(cardNumber, bonusAccount.getBalance());
     }
 
     /**
@@ -157,7 +158,7 @@ public class BonusServiceImpl implements BonusService {
      */
     @Transactional(readOnly = true)
     @Override
-    public Page<BonusOperationDTO> getHistory(String cardNumber, Pageable pageable) {
+    public Page<BonusOperationResponse> getHistory(String cardNumber, Pageable pageable) {
         BonusAccount bonusAccount = bonusAccountRepository.findByCardNumber(cardNumber)
                 .orElseThrow(() -> {
                     log.warn(ACCOUNT_NOT_FOUND_BY_NUMBER, cardNumber);
@@ -194,8 +195,8 @@ public class BonusServiceImpl implements BonusService {
      * @param bonusOperation объект-сущность
      * @return DTO-объект
      */
-    private BonusOperationDTO toDto(BonusOperation bonusOperation) {
-        return BonusOperationDTO.builder().id(bonusOperation.getId())
+    private BonusOperationResponse toDto(BonusOperation bonusOperation) {
+        return BonusOperationResponse.builder().id(bonusOperation.getId())
                 .accountId(bonusOperation.getAccountId())
                 .typeOperation(bonusOperation.getTypeOperation().getTitle())
                 .amountBonus(bonusOperation.getAmountBonus())

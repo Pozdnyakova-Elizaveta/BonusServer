@@ -4,11 +4,11 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
-import org.example.DTO.BonusOperationRequest;
-import org.example.DTO.CancelOperationRequest;
-import org.example.DTO.CurrentBalanceDTO;
-import org.example.DTO.BonusOperationDTO;
-import org.example.Service.BonusService;
+import org.example.DTO.Request.BonusOperationRequest;
+import org.example.DTO.Request.CancelOperationRequest;
+import org.example.DTO.Response.CurrentBalanceResponse;
+import org.example.DTO.Response.BonusOperationResponse;
+import org.example.Service.Interface.BonusService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -38,10 +38,10 @@ public class BonusController {
      */
     @PostMapping("/accrual")
     @ResponseStatus(HttpStatus.CREATED)
-    public BonusOperationDTO accrual(@Valid @RequestBody BonusOperationRequest bonusOperationRequest) {
+    public BonusOperationResponse accrual(@Valid @RequestBody BonusOperationRequest bonusOperationRequest) {
         log.info("Bonus accrual: cardNumber={}, amountBonus={}",
                 bonusOperationRequest.getCardNumber(), bonusOperationRequest.getAmountBonus());
-        BonusOperationDTO response = bonusService.accrual(bonusOperationRequest);
+        BonusOperationResponse response = bonusService.accrual(bonusOperationRequest);
         log.info("Bonuses have been accrued: id={}, accountId={}, typeOperation={}," +
                         "amountBonus={}, statusOperation={}, creationAt={}",
                 response.getId(), response.getAccountId(), response.getTypeOperation(), response.getAmountBonus(),
@@ -57,10 +57,10 @@ public class BonusController {
      */
     @PostMapping("/deduction")
     @ResponseStatus(HttpStatus.CREATED)
-    public BonusOperationDTO deduction(@Valid @RequestBody BonusOperationRequest bonusOperationRequest) {
+    public BonusOperationResponse deduction(@Valid @RequestBody BonusOperationRequest bonusOperationRequest) {
         log.info("Bonus deduction: cardNumber={}, amountBonus={}",
                 bonusOperationRequest.getCardNumber(), bonusOperationRequest.getAmountBonus());
-        BonusOperationDTO response = bonusService.deduction(bonusOperationRequest);
+        BonusOperationResponse response = bonusService.deduction(bonusOperationRequest);
         log.info("Bonuses have been deducted: id={}, accountId={}, typeOperation={}," +
                         "amountBonus={}, statusOperation={}, creationAt={}",
                 response.getId(), response.getAccountId(), response.getTypeOperation(), response.getAmountBonus(),
@@ -76,10 +76,10 @@ public class BonusController {
      */
     @PostMapping("/cancel")
     @ResponseStatus(HttpStatus.CREATED)
-    public BonusOperationDTO cancel(@Valid @RequestBody CancelOperationRequest cancelOperationRequest) {
+    public BonusOperationResponse cancel(@Valid @RequestBody CancelOperationRequest cancelOperationRequest) {
         log.info("Cancellation of  operation: operationId={}",
                 cancelOperationRequest.getOperationId());
-        BonusOperationDTO response = bonusService.cancel(cancelOperationRequest.getOperationId());
+        BonusOperationResponse response = bonusService.cancel(cancelOperationRequest.getOperationId());
         log.info("Operation has been cancelled: id={}, accountId={}, typeOperation={}," +
                         "amountBonus={}, statusOperation={}, creationAt={}",
                 response.getId(), response.getAccountId(), response.getTypeOperation(), response.getAmountBonus(),
@@ -95,12 +95,12 @@ public class BonusController {
      * @return страница с операциями
      */
     @GetMapping("/history")
-    public Page<BonusOperationDTO> getHistory(@NotNull @Pattern(regexp = "\\d{16}") @RequestParam("cardNumber") String cardNumber,
-                                              @PageableDefault(size = 20, sort = "createdAt",
+    public Page<BonusOperationResponse> getHistory(@NotNull @Pattern(regexp = "\\d{16}") @RequestParam("cardNumber") String cardNumber,
+                                                   @PageableDefault(size = 20, sort = "createdAt",
                                                    direction = Sort.Direction.DESC) Pageable pageable) {
         log.info("Getting bonus history: cardNumber={}, pageSize={}, pageNumber={}",
                 cardNumber, pageable.getPageSize(), pageable.getPageNumber());
-        Page<BonusOperationDTO> response = bonusService.getHistory(cardNumber, pageable);
+        Page<BonusOperationResponse> response = bonusService.getHistory(cardNumber, pageable);
         log.info("Bonus history has been got: cardNumber={}, totalElements={}, totalPages={}",
                 cardNumber, response.getTotalElements(), response.getTotalPages());
         return response;
@@ -113,9 +113,9 @@ public class BonusController {
      * @return DTO-объект текущего баланса
      */
     @GetMapping(path = "/balance")
-    public CurrentBalanceDTO getBalance(@NotNull @Pattern(regexp = "\\d{16}") @RequestParam("cardNumber") String cardNumber) {
+    public CurrentBalanceResponse getBalance(@NotNull @Pattern(regexp = "\\d{16}") @RequestParam("cardNumber") String cardNumber) {
         log.info("Getting bonus balance: cardNumber={}", cardNumber);
-        CurrentBalanceDTO response = bonusService.getBalance(cardNumber);
+        CurrentBalanceResponse response = bonusService.getBalance(cardNumber);
         log.info("Bonus balance has been got: cardNumber={}, balance={}", response.getCardNumber(), response.getBalance());
         return response;
     }

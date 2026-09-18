@@ -2,12 +2,12 @@ package org.example.Controller;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.example.DTO.AuthResponse;
-import org.example.DTO.LoginRequest;
-import org.example.DTO.RegisterRequest;
-import org.example.DTO.UserDTO;
-import org.example.Service.JwtService;
-import org.example.Service.UserService;
+import org.example.DTO.Response.AuthResponse;
+import org.example.DTO.Request.LoginRequest;
+import org.example.DTO.Request.RegisterRequest;
+import org.example.DTO.Response.UserResponce;
+import org.example.Service.JWT.JwtService;
+import org.example.Service.Interface.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -37,8 +37,10 @@ public class UserController {
      */
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDTO registerWrite(@Valid @RequestBody RegisterRequest request) {
-        UserDTO response = userService.register(request);
+    public UserResponce registerWrite(@Valid @RequestBody RegisterRequest request) {
+        log.info("Register user: {}", request.getLogin());
+        UserResponce response = userService.register(request);
+        log.info("User is registered: {}, {}", response.getId(), response.getLogin());
         return response;
     }
 
@@ -56,7 +58,9 @@ public class UserController {
                 .findFirst()
                 .map(GrantedAuthority::getAuthority)
                 .orElseThrow(() -> new IllegalStateException("У пользователя нет ролей"));
+        log.info("Login user {}", user.getUsername());
         String token = jwtService.generateToken(user.getUsername(), role);
+        log.info("User {} is authenticated, token received", user.getUsername());
         return new AuthResponse(token);
     }
 }

@@ -31,7 +31,6 @@ public class Main {
         securityFilterDef.setFilterName("springSecurityFilterChain");
         securityFilterDef.setFilterClass("org.springframework.web.filter.DelegatingFilterProxy");
         ctx.addFilterDef(securityFilterDef);
-
         FilterMap securityFilterMap = new FilterMap();
         securityFilterMap.setFilterName("springSecurityFilterChain");
         securityFilterMap.addURLPattern("/*");

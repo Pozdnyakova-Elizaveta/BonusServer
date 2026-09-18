@@ -1,4 +1,4 @@
-package org.example.DTO;
+package org.example.DTO.Response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @Setter
 @Builder
 @AllArgsConstructor
-public class CurrentBalanceDTO {
+public class CurrentBalanceResponse {
     /**
      * Номер карты
      */

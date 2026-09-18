@@ -1,4 +1,4 @@
-package org.example.DTO;
+package org.example.DTO.Response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +12,7 @@ import lombok.Setter;
 @Setter
 @Builder
 @AllArgsConstructor
-public class UserDTO {
+public class UserResponce {
     /**
      * Идентификатор пользователя
      */
