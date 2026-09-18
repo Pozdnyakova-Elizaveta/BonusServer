@@ -16,7 +16,7 @@ import lombok.Builder;
 import org.example.Enum.Role;
 
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 @Getter
 @Setter
 @Builder
