@@ -13,6 +13,6 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface BonusOperationRepository extends JpaRepository<BonusOperation, Long> {
-    @Query("select o from BonusOperation o where o.accountId = :accountId order by o.creationAt desc")
+    @Query("select o from BonusOperation o where o.accountId = :accountId")
     Page<BonusOperation> findByAccountId(@Param("accountId") Long accountId, Pageable pageable);
 }

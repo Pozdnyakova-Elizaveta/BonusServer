@@ -96,7 +96,7 @@ public class BonusController {
      */
     @GetMapping("/history")
     public Page<BonusOperationResponse> getHistory(@NotNull @Pattern(regexp = "\\d{16}") @RequestParam("cardNumber") String cardNumber,
-                                                   @PageableDefault(size = 20, sort = "createdAt",
+                                                   @PageableDefault(size = 20, sort = "creationAt",
                                                    direction = Sort.Direction.DESC) Pageable pageable) {
         log.info("Getting bonus history: cardNumber={}, pageSize={}, pageNumber={}",
                 cardNumber, pageable.getPageSize(), pageable.getPageNumber());
