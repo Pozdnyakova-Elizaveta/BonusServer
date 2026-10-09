@@ -37,7 +37,7 @@ public class BonusAccount {
      * Номер карты
      */
     @Pattern(regexp = "\\d{16}")
-    @Column(name="card_number", nullable = false, unique = true)
+    @Column(name="card_number", updatable = false, nullable = false, unique = true, length = 16)
     private String cardNumber;
     /**
      * Количество бонусов

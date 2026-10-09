@@ -9,7 +9,6 @@ import java.util.Optional;
 /**
  * Репозиторий для бонусных счетов
  */
-@Repository
 public interface BonusAccountRepository extends JpaRepository<BonusAccount, Long> {
     Optional<BonusAccount> findByCardNumber(String cardNumber);
 }

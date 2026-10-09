@@ -13,21 +13,17 @@ import org.example.Enum.Role;
  * Запрос на регистрацию
  */
 @Getter
-@Setter
-@Builder
 @AllArgsConstructor
 public class RegisterRequest {
     /**
      * Логин
      */
-    @NotNull
     @NotBlank
     @Size(min = 8, max = 32)
     private String login;
     /**
      * Пароль
      */
-    @NotNull
     @NotBlank
     @Size(min = 8, max = 32)
     private String password;

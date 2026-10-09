@@ -15,7 +15,6 @@ import java.math.BigDecimal;
  * Запрос на выполнение операции с бонусами - начисление или списание
  */
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class BonusOperationRequest {
@@ -30,6 +29,6 @@ public class BonusOperationRequest {
      */
     @NotNull
     @Positive
-    @Digits(integer = 19, fraction = 2)
+    @Digits(integer = 17, fraction = 2)
     private BigDecimal amountBonus;
 }

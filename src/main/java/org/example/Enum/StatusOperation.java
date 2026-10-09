@@ -10,7 +10,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum StatusOperation {
     COMPLETED("Completed"),
-    CANCELED("Canceled");
+    CANCELLED("Cancelled");
 
     private final String title;
 }

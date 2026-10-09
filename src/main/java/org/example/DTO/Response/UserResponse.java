@@ -3,16 +3,16 @@ package org.example.DTO.Response;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 /**
  * DTO для передачи данных о регистрации
  */
 @Getter
-@Setter
-@Builder
+@NoArgsConstructor
 @AllArgsConstructor
-public class UserResponce {
+@Builder
+public class UserResponse {
     /**
      * Идентификатор пользователя
      */

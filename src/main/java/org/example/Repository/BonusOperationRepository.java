@@ -11,8 +11,6 @@ import org.springframework.stereotype.Repository;
 /**
  * Репозиторий для бонусных операций
  */
-@Repository
 public interface BonusOperationRepository extends JpaRepository<BonusOperation, Long> {
-    @Query("select o from BonusOperation o where o.accountId = :accountId")
-    Page<BonusOperation> findByAccountId(@Param("accountId") Long accountId, Pageable pageable);
+    Page<BonusOperation> findByAccountId(Long accountId, Pageable pageable);
 }

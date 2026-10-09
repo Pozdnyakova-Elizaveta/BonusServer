@@ -1,9 +1,6 @@
 package org.example.DTO.Response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -12,8 +9,8 @@ import java.time.LocalDateTime;
  * DTO для передачи информации об операции
  */
 @Getter
-@Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class BonusOperationResponse {
     /**

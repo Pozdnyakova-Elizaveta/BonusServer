@@ -1,9 +1,6 @@
 package org.example.DTO.Response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 
@@ -11,8 +8,7 @@ import java.math.BigDecimal;
  * DTO для передачи текущего баланса
  */
 @Getter
-@Setter
-@Builder
+@NoArgsConstructor
 @AllArgsConstructor
 public class CurrentBalanceResponse {
     /**

@@ -19,7 +19,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.sql.DataSource;
 import java.util.Properties;
@@ -32,9 +34,8 @@ import java.util.Properties;
 @ComponentScan(
         basePackages = "org.example",
         excludeFilters = {
-                @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = Controller.class),
-                @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = RestController.class),
-                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebConfig.class)
+                @ComponentScan.Filter(type = FilterType.ANNOTATION,
+                        classes = {Controller.class, RestController.class, RestControllerAdvice.class, ControllerAdvice.class})
         }
 )
 @EnableJpaRepositories(basePackages = "org.example.Repository")
@@ -56,7 +57,6 @@ public class AppConfig {
         hikariConfig.setJdbcUrl(url);
         hikariConfig.setUsername(username);
         hikariConfig.setPassword(password);
-        hikariConfig.setDriverClassName("org.postgresql.Driver");
         return new HikariDataSource(hikariConfig);
     }
 
@@ -75,7 +75,7 @@ public class AppConfig {
                                                                        @Value("${hibernate.dialect}") String dialect,
                                                                        @Value("${hibernate.generate_ddl:false}") String generateDdl,
                                                                        @Value("${hibernate.hbm2ddl.auto}") String hbm2ddlAuto,
-                                                                       @Value("${hibernate.show_sql:true}") String showSql
+                                                                       @Value("${hibernate.show_sql:false}") String showSql
     ) {
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         vendorAdapter.setGenerateDdl(Boolean.parseBoolean(generateDdl));

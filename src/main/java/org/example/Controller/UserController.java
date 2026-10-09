@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import org.example.DTO.Response.AuthResponse;
 import org.example.DTO.Request.LoginRequest;
 import org.example.DTO.Request.RegisterRequest;
-import org.example.DTO.Response.UserResponce;
+import org.example.DTO.Response.UserResponse;
 import org.example.Service.JWT.JwtService;
 import org.example.Service.Interface.UserService;
 import org.slf4j.Logger;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @org.springframework.web.bind.annotation.RestController
-@RequestMapping("/bonus_server")
+@RequestMapping("/bonus-server")
 @AllArgsConstructor
 public class UserController {
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
@@ -37,9 +37,9 @@ public class UserController {
      */
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponce registerWrite(@Valid @RequestBody RegisterRequest request) {
+    public UserResponse register(@Valid @RequestBody RegisterRequest request) {
         log.info("Register user: {}", request.getLogin());
-        UserResponce response = userService.register(request);
+        UserResponse response = userService.register(request);
         log.info("User is registered: {}, {}", response.getId(), response.getLogin());
         return response;
     }

@@ -29,7 +29,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class BonusServiceImpl implements BonusService {
     private static final Logger log = LoggerFactory.getLogger(BonusServiceImpl.class);
-    private static final String ACCOUNT_NOT_FOUND_BY_NUMBER = "No account with the card number: {}, cardNumber";
+    private static final String ACCOUNT_NOT_FOUND_BY_NUMBER = "No account with the card number: {}";
     private final BonusAccountRepository bonusAccountRepository;
     private final BonusOperationRepository bonusOperationRepository;
 
@@ -98,11 +98,11 @@ public class BonusServiceImpl implements BonusService {
                     log.warn("No operation with id: {}", operationId);
                     return new OperationNotFoundException(operationId);
                 });
-        if (cancelOperation.getStatus() == StatusOperation.CANCELED) {
+        if (cancelOperation.getStatus() == StatusOperation.CANCELLED) {
             log.warn("Operation has already been cancelled: id={}, accountId={}, typeOperation={}, statusOperation={}",
                     cancelOperation.getId(), cancelOperation.getAccountId(), cancelOperation.getTypeOperation(),
                     cancelOperation.getStatus());
-            throw new AlreadyCancelException(cancelOperation.getId());
+            throw new OperationAlreadyCanceledException(cancelOperation.getId());
         }
         Long idCustomer = cancelOperation.getAccountId();
         BonusAccount bonusAccount = bonusAccountRepository.findById(idCustomer)
@@ -126,7 +126,7 @@ public class BonusServiceImpl implements BonusService {
                 throw new UnacceptableCancelException(cancelOperation.getId());
             }
         }
-        cancelOperation.setStatus(StatusOperation.CANCELED);
+        cancelOperation.setStatus(StatusOperation.CANCELLED);
         BonusOperation bonusOperation = saveOperation(idCustomer, cancelOperation.getAmountBonus(),
                 TypeOperation.CANCELLATION, cancelOperation.getId());
         return toDto(bonusOperation);

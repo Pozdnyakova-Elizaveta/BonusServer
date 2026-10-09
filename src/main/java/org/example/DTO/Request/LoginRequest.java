@@ -2,29 +2,26 @@ package org.example.DTO.Request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.Size;
+import lombok.*;
 
 /**
  * Запрос на аутентификацию
  */
 @Getter
-@Setter
-@Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class LoginRequest {
     /**
      * Логин
      */
-    @NotNull
+    @Size(max = 128)
     @NotBlank
     private String login;
     /**
      * Пароль
      */
-    @NotNull
+    @Size(max = 128)
     @NotBlank
     private String password;
 }

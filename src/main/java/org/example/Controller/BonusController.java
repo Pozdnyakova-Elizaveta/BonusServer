@@ -3,9 +3,9 @@ package org.example.Controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import org.example.DTO.Request.BonusOperationRequest;
-import org.example.DTO.Request.CancelOperationRequest;
 import org.example.DTO.Response.CurrentBalanceResponse;
 import org.example.DTO.Response.BonusOperationResponse;
 import org.example.Service.Interface.BonusService;
@@ -16,15 +16,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 
 @org.springframework.web.bind.annotation.RestController
-@RequestMapping("/bonus_server")
+@RequestMapping("/bonus-server")
 @AllArgsConstructor
 public class BonusController {
     private static final Logger log = LoggerFactory.getLogger(BonusController.class);
@@ -37,7 +32,6 @@ public class BonusController {
      * @return DTO операции над бонусами
      */
     @PostMapping("/accrual")
-    @ResponseStatus(HttpStatus.CREATED)
     public BonusOperationResponse accrual(@Valid @RequestBody BonusOperationRequest bonusOperationRequest) {
         log.info("Bonus accrual: cardNumber={}, amountBonus={}",
                 bonusOperationRequest.getCardNumber(), bonusOperationRequest.getAmountBonus());
@@ -56,7 +50,6 @@ public class BonusController {
      * @return DTO операции над бонусами
      */
     @PostMapping("/deduction")
-    @ResponseStatus(HttpStatus.CREATED)
     public BonusOperationResponse deduction(@Valid @RequestBody BonusOperationRequest bonusOperationRequest) {
         log.info("Bonus deduction: cardNumber={}, amountBonus={}",
                 bonusOperationRequest.getCardNumber(), bonusOperationRequest.getAmountBonus());
@@ -71,15 +64,13 @@ public class BonusController {
     /**
      * Отмена операции
      *
-     * @param cancelOperationRequest запрос с идентификатором отменяемой операции
+     * @param operationId идентификатор отменяемой операции
      * @return DTO операции над бонусами
      */
-    @PostMapping("/cancel")
-    @ResponseStatus(HttpStatus.CREATED)
-    public BonusOperationResponse cancel(@Valid @RequestBody CancelOperationRequest cancelOperationRequest) {
-        log.info("Cancellation of  operation: operationId={}",
-                cancelOperationRequest.getOperationId());
-        BonusOperationResponse response = bonusService.cancel(cancelOperationRequest.getOperationId());
+    @PostMapping("/operations/{operationId}/cancel")
+    public BonusOperationResponse cancel(@PathVariable @Positive Long operationId) {
+        log.info("Cancellation of  operation: operationId={}", operationId);
+        BonusOperationResponse response = bonusService.cancel(operationId);
         log.info("Operation has been cancelled: id={}, accountId={}, typeOperation={}," +
                         "amountBonus={}, statusOperation={}, creationAt={}",
                 response.getId(), response.getAccountId(), response.getTypeOperation(), response.getAmountBonus(),
@@ -96,7 +87,7 @@ public class BonusController {
      */
     @GetMapping("/history")
     public Page<BonusOperationResponse> getHistory(@NotNull @Pattern(regexp = "\\d{16}") @RequestParam("cardNumber") String cardNumber,
-                                                   @PageableDefault(size = 20, sort = "creationAt",
+                                                   @PageableDefault(size = 20, sort = {"creationAt", "id"},
                                                    direction = Sort.Direction.DESC) Pageable pageable) {
         log.info("Getting bonus history: cardNumber={}, pageSize={}, pageNumber={}",
                 cardNumber, pageable.getPageSize(), pageable.getPageNumber());

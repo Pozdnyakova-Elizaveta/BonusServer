@@ -1,11 +1,11 @@
 package org.example.Service.Interface;
 
 import org.example.DTO.Request.RegisterRequest;
-import org.example.DTO.Response.UserResponce;
+import org.example.DTO.Response.UserResponse;
 
 /**
  * Сервис управления пользователями
  */
 public interface UserService {
-    UserResponce register(RegisterRequest registerRequest);
+    UserResponse register(RegisterRequest registerRequest);
 }

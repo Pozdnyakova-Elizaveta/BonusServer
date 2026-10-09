@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -37,7 +39,7 @@ public class RestExceptionHandler {
     @ExceptionHandler(ApplicationException.class)
     public ProblemDetail handleApplication(ApplicationException e) {
         log.warn("Application error: {}", e.getMessage());
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(e.getStatus(), e.getMessage());
         problemDetail.setTitle("Application error");
         return problemDetail;
     }
@@ -51,9 +53,12 @@ public class RestExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleValidation(MethodArgumentNotValidException e) {
         log.warn("Validation error: {}", e.getMessage());
-        String msg = e.getBindingResult().getFieldErrors().stream()
-                .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
-                .collect(Collectors.joining("; "));
+        List<String> errors = new ArrayList<>();
+        e.getBindingResult().getFieldErrors().forEach(fe ->
+                errors.add(fe.getField() + ": " + fe.getDefaultMessage()));
+        e.getBindingResult().getGlobalErrors().forEach(ge ->
+                errors.add(ge.getObjectName() + ": " + ge.getDefaultMessage()));
+        String msg = String.join("; ", errors);
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, msg);
         problemDetail.setTitle("Validation error");
         return problemDetail;
@@ -97,32 +102,18 @@ public class RestExceptionHandler {
     }
 
     /**
-     * Обработка исключения - логин уже зарегистрирован
+     * Обработка исключения - некорректный формат входящих данных
      *
      * @param e выброшенное исключение
-     * @return ответ со статусом 409 и сообщение об ошибке
-     */
-    @ExceptionHandler(LoginAlreadyExistsException.class)
-    public ProblemDetail handleLoginAlreadyExists(LoginAlreadyExistsException e) {
-        log.warn("Login already exists: {}", e.getMessage());
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
-        problemDetail.setTitle("Login already exists: "+e.getMessage());
-        return problemDetail;
-    }
-
-    /**
-     * Обработка исключения - логин уже зарегистрирован
-     *
-     * @param e выброшенное исключение
-     * @return ответ со статусом 409 и сообщение об ошибке
+     * @return ответ со статусом 400 и сообщение об ошибке
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ProblemDetail handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
-        log.warn("Http Message Not Readable: {}", e.getMessage());
-        Throwable cause = e.getCause();
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
-        problemDetail.setTitle("Http Message Not Readable: "+ e.getMessage());
-        return problemDetail;
+        log.warn("Malformed request body: {}", e.getMessage());
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST, "Malformed JSON request");
+        pd.setTitle("Bad Request");
+        return pd;
     }
 
     /**
