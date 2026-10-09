@@ -9,3 +9,4 @@ CREATE TABLE bonus_account
     version     BIGINT         NOT NULL DEFAULT 0,
     CONSTRAINT chk_bonus_account_card_number_format CHECK (card_number ~ '^\d{16}$')
 );
+--rollback DROP TABLE bonus_account;

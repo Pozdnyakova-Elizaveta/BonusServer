@@ -16,3 +16,4 @@ CREATE TABLE bonus_operation
     CONSTRAINT fk_bonus_operation_cancelled
         FOREIGN KEY (cancelled_operation_id) REFERENCES bonus_operation (id)
 );
+--rollback DROP TABLE bonus_operation;
