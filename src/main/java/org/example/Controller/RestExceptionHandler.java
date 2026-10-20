@@ -15,9 +15,11 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +44,35 @@ public class RestExceptionHandler {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(e.getStatus(), e.getMessage());
         problemDetail.setTitle("Application error");
         return problemDetail;
+    }
+
+    /**
+     * Обработка исключений несоответствия типа переданного параметра в запросе
+     *
+     * @param e выброшенное исключение
+     * @return ответ со статусом 400 и сообщение об ошибке
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ProblemDetail handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
+        log.warn("Argument type mismatch: {}", e.getMessage());
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST, "Argument type mismatch: " + e.getMessage());
+        pd.setTitle("Argument type mismatch");
+        return pd;
+    }
+
+    /**
+     * Обработка исключений при отсутствии нужных параметров в запросе
+     * @param e выброшенное исключение
+     * @return ответ со статусом 400 и сообщение об ошибке
+     */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ProblemDetail handleMissingServletRequestParameterException(MissingServletRequestParameterException e) {
+        log.warn("The parameter was not passed: {}", e.getMessage());
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST, "The parameter was not passed: " + e.getMessage());
+        pd.setTitle("The parameter was not passed");
+        return pd;
     }
 
     /**
