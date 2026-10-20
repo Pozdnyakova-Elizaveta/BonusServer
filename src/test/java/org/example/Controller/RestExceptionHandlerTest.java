@@ -4,9 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.DTO.Request.BonusOperationRequest;
 import org.example.DTO.Request.RegisterRequest;
 import org.example.Enum.Role;
+import org.example.Exception.*;
 import org.example.Service.JWT.JwtService;
 import org.example.Service.Interface.BonusService;
 import org.example.Service.Interface.UserService;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,9 +26,11 @@ import java.math.BigDecimal;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 /**
  * Класс тестирования обработки исключений
@@ -54,6 +60,7 @@ class RestExceptionHandlerTest {
      * Маппер
      */
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String CARD_NUMBER = "4111111111111111";
 
     /**
      * Создание тестовых объектов перед каждым тестом
@@ -266,5 +273,136 @@ class RestExceptionHandlerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest());
+    }
+
+    /**
+     * Тест - ответ 404 при отсутствии бонусного счёта
+     */
+    @Test
+    void testAccrualReturn404ForAccountNotFound() throws Exception {
+        when(bonusService.accrual(any())).thenThrow(new AccountNotFoundException(CARD_NUMBER));
+        BonusOperationRequest request = new BonusOperationRequest(CARD_NUMBER, new BigDecimal("10.00"));
+        mockMvc.perform(post("/bonus-server/accrual")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound());
+    }
+
+    /**
+     * Тест - ответ 404 при отсутствии операции
+     */
+    @Test
+    void testCancelReturn404ForOperationNotFound() throws Exception {
+        Long id = 42L;
+        when(bonusService.cancel(any())).thenThrow(new OperationNotFoundException(id));
+        mockMvc.perform(post(String.format("/bonus-server/operations/%s/cancel", id)))
+                .andExpect(status().isNotFound());
+    }
+
+    /**
+     * Тест - ответ 409 при дублировании логина при регистрации
+     */
+    @Test
+    void testRegisterReturn409ForLoginAlreadyExists() throws Exception {
+        String login = "existing_user";
+        RegisterRequest request = new RegisterRequest(login, "password123", Role.ROLE_READ);
+        when(userService.register(any())).thenThrow(new LoginAlreadyExistsException(login));
+        mockMvc.perform(post("/bonus-server/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict());
+    }
+
+    /**
+     * Тест - ответ 409 при попытке отменить уже отменённую операцию
+     */
+    @Test
+    void testCancelReturn409ForAlreadyCanceled() throws Exception {
+        Long id = 99L;
+        when(bonusService.cancel(any())).thenThrow(new OperationAlreadyCanceledException(id));
+        mockMvc.perform(post(String.format("/bonus-server/operations/%s/cancel", id)))
+                .andExpect(status().isConflict());
+    }
+
+    /**
+     * Тест - ответ 409 при оптимистической блокировке
+     */
+    @Test
+    void testAccrualReturn409ForOptimisticLock() throws Exception {
+        when(bonusService.accrual(any())).thenThrow(new ObjectOptimisticLockingFailureException(Object.class, "id"));
+        BonusOperationRequest request = new BonusOperationRequest(CARD_NUMBER, new BigDecimal("10.00"));
+        mockMvc.perform(post("/bonus-server/accrual")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict());
+    }
+
+    /**
+     * Тест - ответ 422 при недостатке бонусов для списания
+     */
+    @Test
+    void testDeductionReturn422ForInsufficientBonus() throws Exception {
+        when(bonusService.deduction(any())).thenThrow(
+                new InsufficientBonusException(CARD_NUMBER, new BigDecimal("5.00")));
+        BonusOperationRequest request = new BonusOperationRequest(CARD_NUMBER, new BigDecimal("50.00"));
+        mockMvc.perform(post("/bonus-server/deduction")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnprocessableContent());
+    }
+
+    /**
+     * Тест - ответ 422 при попытке отмены операции отмены
+     */
+    @Test
+    void testCancelReturn422ForUnacceptableCancel() throws Exception {
+        Long id = 7L;
+        when(bonusService.cancel(any())).thenThrow(new UnacceptableCancelException(id));
+        mockMvc.perform(post(String.format("/bonus-server/operations/%s/cancel", id)))
+                .andExpect(status().isUnprocessableContent());
+    }
+
+    /**
+     * Тест - ответ 403 при отказе в доступе по ролям
+     */
+    @Test
+    void testAccrualReturn403ForAccessDenied() throws Exception {
+        when(bonusService.accrual(any())).thenThrow(new AccessDeniedException("Access denied"));
+        BonusOperationRequest request = new BonusOperationRequest(CARD_NUMBER, new BigDecimal("10.00"));
+        mockMvc.perform(post("/bonus-server/accrual")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    /**
+     * Тест - ответ 401 при ошибке аутентификации
+     */
+    @Test
+    void testRegisterReturn401ForAuthenticationError() throws Exception {
+        RegisterRequest request = new RegisterRequest("new_user", "password123", Role.ROLE_READ);
+        when(userService.register(any())).thenThrow(new AuthenticationException("Auth failed") {
+            @Override
+            public String getMessage() {
+                return "Auth failed";
+            }
+        });
+        mockMvc.perform(post("/bonus-server/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    /**
+     * Тест - ответ 500 при необработанной ошибке на сервере
+     */
+    @Test
+    void testAccrualReturn500ForUnhandledException() throws Exception {
+        when(bonusService.accrual(any())).thenThrow(new RuntimeException("Unexpected error"));
+        BonusOperationRequest request = new BonusOperationRequest(CARD_NUMBER, new BigDecimal("10.00"));
+        mockMvc.perform(post("/bonus-server/accrual")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isInternalServerError());
     }
 }
